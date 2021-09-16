@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
+from django.http import Http404
 from rest_framework import authentication, permissions
 from django.contrib.auth.models import User
 from django.db.models import Q
@@ -23,3 +23,27 @@ class ProductList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class ProductDetail(APIView):
+    def get_object(self, category_slug, product_slug):
+        try:
+            return Product.objects.filter(category__slug=category_slug).get(slug=product_slug)
+        except Product.DoesNotExist:
+            raise Http404
+
+    def get(self, request, category_slug, product_slug, format=None):
+        product = self.get_object(category_slug,product_slug)
+        serializer = ProductSerializer(product)
+        return Response(serializer.data)
+
+    def put(self, request, category_slug, product_slug, format=None):
+        product = self.get_object(category_slug,product_slug)
+        serializer = ProductSerializer(product, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, category_slug, product_slug, format=None):
+        product = self.get_object(category_slug, product_slug)
+        product.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
