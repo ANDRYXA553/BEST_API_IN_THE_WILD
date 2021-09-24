@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from .models import Product, Category
 
+
 class ProductSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Product
         fields = [
@@ -10,13 +12,16 @@ class ProductSerializer(serializers.ModelSerializer):
             'title',
             'description',
             'price',
-            'in_stock',
             'description',
             'get_image',
-            'get_absolute_url',
-            'get_thumbnail'
+            'avg_review',
+            'review_count',
+            'isActive',
+            'created_at'
+
         ]
         # OPTIMIZE CODE ABOVE
+
 
 class CategorySerializer(serializers.ModelSerializer):
     products = ProductSerializer(many=True)
