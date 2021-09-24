@@ -5,6 +5,8 @@ from django.core.files import File
 from io import BytesIO
 from PIL import Image
 
+full_url = 'http://127.0.0.1:8000'
+
 
 class Category(models.Model):
     name = models.CharField(max_length=255, db_index=True)
@@ -24,14 +26,12 @@ class Product(models.Model):
     category = models.ForeignKey(Category, related_name='products', on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    image = models.ImageField(upload_to='uploads/', default='uploads/default.png')
-    thumbnail = models.ImageField(upload_to='uploads/', blank=True, null=True)
+    image = models.ImageField(upload_to='uploads/', blank=True, null=True)
     slug = models.SlugField(max_length=255)
     price = models.DecimalField(max_digits=4, decimal_places=2)
-    in_stock = models.BooleanField(default=True)
-    is_active = models.BooleanField(default=True)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
+    isActive = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    avg_review = models.CharField(max_length=10)
 
     class Meta:
         ordering = ('-created',)
@@ -39,20 +39,20 @@ class Product(models.Model):
     def get_absolute_url(self):
         return f'/{self.category.slug}/{self.slug}'
 
-    def get_image(self):
-        if self.image:
-            return 'http://127.0.0.1:8000' + self.image.url
-        return ''
+    # def get_image(self):
+    #     if self.image:
+    #         return full_url + self.image.url
+    #     return ''
 
     def get_thumbnail(self):
         if self.thumbnail:
-            return 'http://127.0.0.1:8000' + self.thumbnail.url
+            return full_url + self.thumbnail.url
         else:
             if self.image:
                 self.thumbnail = self.make_thumbnail(self.image)
                 self.save()
 
-                return 'http://127.0.0.1:8000' + self.thumbnail.url
+                return full_url + self.image.url
             else:
                 return ''
 
